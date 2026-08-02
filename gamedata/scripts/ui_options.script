@@ -352,7 +352,7 @@ options = {
 		{ id= "dispersion_base"	    	 ,type= "track"    ,val= 2	,curr= {curr_gameplay,"dispersion_base"}	 ,functor= {func_gameplay_diff,"dispersion_base"}  	,min= 1       ,max= 3     ,step= 0.1  	    },
 		{ id= "dispersion_factor"    	 ,type= "track"    ,val= 2	,curr= {curr_gameplay,"dispersion_factor"}	 ,functor= {func_gameplay_diff,"dispersion_factor"}	,min= 1       ,max= 5     ,step= 0.1  	    },
 		{ id= "power_loss_bias"    	     ,type= "track"    ,val= 2	,curr= {curr_gameplay,"power_loss_bias"}	 ,functor= {func_gameplay_diff,"power_loss_bias"}	,min= 0.0     ,max= 1     ,step= 0.05  		},
-		{ id= "weight"    	     		 ,type= "track"    ,val= 2	,curr= {curr_gameplay,"weight"}	     		 ,functor= {func_gameplay_diff,"weight"}	 		,min= 10      ,max= 50    ,step= 1  	    },
+		{ id= "weight"    	     		 ,type= "track"    ,val= 2	,curr= {curr_gameplay,"weight"}	     		 ,functor= {func_gameplay_diff,"weight"}	 		,min= 10      ,max= 5000    ,step= 1  	    },
 		{ id= "thirst"    	     		 ,type= "check"    ,val= 1	,curr= {curr_gameplay,"thirst"}	         	 ,functor= {func_gameplay_diff,"thirst"}	                           	 						},
 		{ id= "sleep"    	     		 ,type= "check"    ,val= 1	,curr= {curr_gameplay,"sleep"}	         	 ,functor= {func_gameplay_diff,"sleep"}	                           	 							},
 		{ id= "radiation_day"    	     ,type= "check"    ,val= 1	,curr= {curr_gameplay,"radiation_day"}	     ,functor= {func_gameplay_diff,"radiation_day"}	     	                   	 					},
