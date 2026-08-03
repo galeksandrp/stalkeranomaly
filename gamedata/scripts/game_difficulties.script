@@ -9,6 +9,8 @@
 
 local ini_diff = ini_file("plugins\\difficulty.ltx")
 
+local utils_sys_ini = system_ini()
+
 local eco_num = 1
 local economy = {}
 local factors_eco = {}
@@ -32,6 +34,7 @@ function setup_game_factors(diff)
 	factors_game["dispersion_factor"]	= gameplay["dispersion_factor"] or ini_diff:r_float_ex("gdiff_" .. diff , "dispersion_factor") or 1
 	factors_game["power_loss_bias"]		= gameplay["power_loss_bias"] or ini_diff:r_float_ex("gdiff_" .. diff , "power_loss_bias") or 0.2
 	factors_game["weight"]			    = gameplay["weight"] or ini_diff:r_float_ex("gdiff_" .. diff , "max_weight") or 25
+	factors_game["utils_sprint"]		= gameplay["utils_sprint"] or db.actor:get_actor_sprint_koef() or utils_sys_ini:r_float_ex("actor" , "sprint_koef") or 2.08
 	factors_game["thirst"]				= gameplay["thirst"] or ((gameplay["thirst"] ~= false) and ini_diff:r_bool_ex("gdiff_" .. diff , "thirst")) or false
 	factors_game["sleep"]				= gameplay["sleep"] or ((gameplay["sleep"] ~= false) and ini_diff:r_bool_ex("gdiff_" .. diff , "sleep")) or false
 	factors_game["radiation_day"]		= gameplay["radiation_day"] or ((gameplay["radiation_day"] ~= false) and ini_diff:r_bool_ex("gdiff_" .. diff , "radiation_day")) or false
@@ -79,6 +82,7 @@ function set_game_factor(key, val)
 	elseif (key == "dispersion_factor") then set_dispersion_factor()
 	elseif (key == "power_loss_bias") then set_actor_stamina()
 	elseif (key == "weight") then set_actor_weight()
+	elseif (key == "utils_sprint") then utils_set_sprint_factor()
 	elseif (key == "thirst") then actor_status_thirst.toggle_feature(val)
 	elseif (key == "sleep") then actor_status_sleep.toggle_feature(val)
 	end
@@ -152,6 +156,14 @@ function set_actor_weight()
 	end
 end
 
+function utils_set_sprint_factor()
+	local actor_sprint_factor = db.actor:get_actor_sprint_koef()
+	local gf_sprint_factor = get_game_factor("utils_sprint") or actor_sprint_factor
+	if (gf_sprint_factor ~= actor_sprint_factor) then
+		db.actor:set_actor_sprint_koef(gf_sprint_factor)
+	end
+end
+
 function set_weapon_degradation()
 	local val = get_eco_factor("weapon_degradation") or 1
 	exec_console_cmd("wpn_degradation " .. tostring(val))
@@ -188,6 +200,7 @@ local function on_game_load()
 	set_dispersion_base() -- prepare dispersion_base
 	set_dispersion_factor() -- prepare dispersion_factor
 	set_actor_weight() -- prepare weight
+	utils_set_sprint_factor()
 	set_actor_stamina() -- prepare power loss bias
 	set_weapon_degradation() -- weapon degradation
 	actor_status_thirst.toggle_feature(factors_game["thirst"]) -- prepare thirst
