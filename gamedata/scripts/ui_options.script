@@ -327,7 +327,7 @@ options = {
 		{ id= "condition_buy_override"   ,type= "track"    ,val= 2	, curr = {trader_cond,'get'}, functor= {trader_cond,"set"}     ,min= 0   ,max= 100   ,step= 1          },
 		{ id= "goodwill"    	    	 ,type= "track"    ,val= 2	,curr= {curr_economy,"goodwill"}	         ,functor= {func_economy_diff,"goodwill"}	           ,min= 0.5     ,max= 3     ,step= 0.1  	    },
 		{ id= "rewards"    	    	 	 ,type= "track"    ,val= 2	,curr= {curr_economy,"rewards"}	 	         ,functor= {func_economy_diff,"rewards"}	 	       ,min= 0.5     ,max= 3     ,step= 0.1  	    },
-		{ id= "repair"    	    	     ,type= "track"    ,val= 2	,curr= {curr_economy,"repair"}	             ,functor= {func_economy_diff,"repair"}	               ,min= 1       ,max= 2     ,step= 0.1  	    },
+		{ id= "repair"    	    	     ,type= "track"    ,val= 2	,curr= {curr_economy,"repair"}	             ,functor= {func_economy_diff,"repair"}	               ,min= 0       ,max= 2     ,step= 0.1  	    },
 		{ id= "upgrade"    	    	     ,type= "track"    ,val= 2	,curr= {curr_economy,"upgrade"}	             ,functor= {func_economy_diff,"upgrade"}	           ,min= 1       ,max= 3     ,step= 0.1  	    },
 		{ id= "buy"    	    	         ,type= "track"    ,val= 2	,curr= {curr_economy,"buy"}	                 ,functor= {func_economy_diff,"buy"}	               ,min= 0.5     ,max= 2     ,step= 0.1  	    },
 		{ id= "sell"    	    	     ,type= "track"    ,val= 2	,curr= {curr_economy,"sell"}	             ,functor= {func_economy_diff,"sell"}	               ,min= 0.5     ,max= 2     ,step= 0.1  	    },
