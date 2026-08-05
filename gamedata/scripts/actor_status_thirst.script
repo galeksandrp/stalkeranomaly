@@ -207,6 +207,10 @@ function get_last_drink()
 end
 
 function get_ml_to_full_hydratation()
+	if true then
+		return convert_to_ml_eq((last_drink or 0)/1000)
+	end
+
 	return convert_to_ml_eq(last_drink/1000)
 end
 
