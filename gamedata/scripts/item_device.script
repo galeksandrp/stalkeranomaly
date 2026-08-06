@@ -241,6 +241,9 @@ local function on_key_release(key)
 		local msg = string.format( "%.2f",(1 - actor_status.get_satienty(false)) * coef) .. " kcal to full   "
 		msg = msg .. actor_status_thirst.get_ml_to_full_hydratation() .. " ml H2O to full   "
 		msg = msg .. actor_status_sleep.get_hours_to_full_rested() .. " hours to fully rested   "
+		if true then
+			msg = msg .. db.actor:get_actor_sprint_koef() .. " sprint_koef   "
+		end
 	
 		local obj_geiger = db.actor:object(device_geiger)
 		if obj_geiger and drain_device_on_event(obj_geiger, device_geiger, 2) then
