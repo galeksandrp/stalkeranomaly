@@ -61,6 +61,7 @@ function prepare()
 		{ 	name = "Reload Weapon HUD" 				, functor = {reload_wpn_hud} 					     , hide_ui = 2 		, key = "DIK_U"			},
 		{ 	name = "Change faction" 				, functor = {start_faction_changer} 				 , hide_ui = 1 								},
 		{ 	name = "Give basic items" 				, functor = {spawn_basic_equipment} 				 , hide_ui = 2 		, key = "DIK_A"			},
+		{ 	name = "UTILS: repair items" 			, functor = {utils_repair_equipment} 				 , hide_ui = 2 		, key = "DIK_D"			},
 		{ 	name = "Get nearest object" 			, cmd = "get_nearest_object cam" 				     , hide_ui = 0 		, key = "DIK_N"			},
 		{ 	name = "Start an emission" 				, cmd = "surge start" 						         , hide_ui = 2 								},
 		{ 	name = "Stop an emission" 				, cmd = "surge stop" 						         , hide_ui = 2 								},
@@ -434,6 +435,14 @@ function spawn_basic_equipment()
 		alife_create_item(basic_items[i], db.actor)
 	end
 	send_output('-Basic equipment for testing, check')
+end
+
+function utils_repair_equipment()
+	local function transfer_object_item(item)
+		item:set_condition(1)
+	end
+	db.actor:inventory_for_each(transfer_object_item)
+	send_output('- repaired')
 end
 
 function start_itm_weapon_editor()
