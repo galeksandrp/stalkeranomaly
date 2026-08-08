@@ -6,7 +6,7 @@
 
 
 -- Set to true if you want punches to make actor drop active item
-local enable_drop_item = true
+local enable_drop_item = false
 
 
 --------------------
