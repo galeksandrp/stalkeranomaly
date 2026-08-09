@@ -6,6 +6,11 @@ Author: RavenAscendant
 --]]
 
 
+local function SYS_GetParam(typ, sec, param, def)
+	return aaa_rax_icon_override_mcm.exportSYS_GetParam(typ, sec, param, def)
+end
+
+
 -- UI events
 local K_K = DIK_keys.DIK_K --if you want to change this change the very last letter. must be caps.
 local K_J = DIK_keys.DIK_J --if you want to change this change the very last letter. must be caps.
