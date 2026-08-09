@@ -239,6 +239,13 @@ function icon_collectable(cell, obj, sec)
         local id = cell.ID
         local sec = SYS_GetParam(0, sec, "parent_section", sec)
         local axis = utils_xml.get_item_axis(sec)
+
+        -- demonized: HD Inventory Icons Framework
+        local icon_override = aaa_rax_icon_override_mcm and aaa_rax_icon_override_mcm.icon_override
+        local scale = icon_override and icon_override:section_exist(sec) and (icon_override:r_float_ex(sec, "inv_grid_scale") or 1) or aaa_rax_icon_override_mcm.exportSYS_GetParam(2, sec, "inv_grid_scale", 1)
+        axis.w = math.ceil(axis.w / scale)
+        axis.h = math.ceil(axis.h / scale)
+
         if settings.enable_icon_found and collected_items[sec] and id and collected_items[sec][id] then
             return {texture = "ui_icon_checkmark", x = (axis.w - 13), y = 1, w = 12, h = 12}
         elseif settings.enable_icon and not collected_items[sec] and not (cell.container.ID == "actor_equ" or cell.container.ID == "actor_belt") then
