@@ -1,0 +1,356 @@
+local gc = game.translate_string
+local parse_keys = utils_data.parse_string_keys
+
+collected_items = {} -- Key: section , Value: table with id's
+
+local total_collectables = {}
+local time_last_income = 0
+
+local XML
+collector_ini = ini_file_ex("plugins\\the_collector\\the_collector_settings.ltx")
+
+valid_actor_bags = {
+    [EDDListType.iActorBag] = true,
+    [EDDListType.iActorSlot] = true
+}
+
+function dprint(...)
+    if settings.debug then
+        printf(...)
+    end
+end
+
+function base_build_desc_header(obj, sec, str) end
+
+function on_game_start()
+    --MCM
+    RegisterScriptCallback("actor_on_first_update", load_settings)
+	RegisterScriptCallback("on_option_change", load_settings)
+
+    --The Collector
+    RegisterScriptCallback("ActorMenu_on_item_after_move", ActorMenu_on_item_after_move)
+    RegisterScriptCallback("save_state", save_state)
+    RegisterScriptCallback("load_state", load_state)
+    RegisterScriptCallback("actor_on_first_update", start_income_cycle)
+    RegisterScriptCallback("on_option_change", start_income_cycle)
+
+    --Item icon
+	rax_icon_layers.register("collectable", icon_collectable) --used like a callback register
+
+    base_build_desc_header = ui_item.build_desc_header
+	ui_item.build_desc_header = monkey_build_desc_header
+
+    XML = CScriptXmlInit()
+	XML:ParseFile("ui_the_collector.xml")
+    Base_Add_Icon = utils_ui.UICellItem.Add_Icon
+    utils_ui.UICellItem.Add_Icon = Monke_Add_Icon
+    Base_Cell_Reset = utils_ui.UICellItem.Reset
+    utils_ui.UICellItem.Reset = Monke_Cell_Reset
+
+    total_collectables = count_collectables()
+end
+
+function start_income_cycle()
+    if settings.enable_income and minimum_objects_collected() then
+        ResetTimeEvent("the_collector", "check_for_income", time_to_next_income()) -- Only resets if there's already an income cycle
+        CreateTimeEvent("the_collector", "check_for_income", time_to_next_income(), check_for_income) -- Starts income cycle if there isn't one
+    else
+        RemoveTimeEvent("the_collector", "check_for_income")
+    end
+end
+
+function check_for_income()
+    if not minimum_objects_collected() then
+        dprint("Not minimum_objects_collected")
+        return true
+    end
+
+    dprint("Checking for income. Last " .. time_last_income .. "  Elapsed " .. get_time_elapsed())
+    --local income = size_table(collected_items) * settings.money_per_object --income_per_item
+    local income = 0
+
+    for sec, v in pairs(collected_items) do
+        if not settings.scale_by_quality then
+            income = income + settings.money_per_object
+        else
+            local highest_quality = get_highest_quality_collected_object(sec)
+            income = income + (settings.money_per_object * highest_quality)
+        end
+    end
+
+    --income = math.floor(income * (math.random(80, 120) / 100)) -- Apply random range
+    income = round(income)
+
+    db.actor:give_money(income)
+    show_income_news(income)
+
+    time_last_income = get_time_elapsed()
+
+    ResetTimeEvent("the_collector", "check_for_income", income_interval_seconds())
+end
+
+function time_to_next_income()
+    local time_to_next_income = income_interval_seconds() + time_last_income - get_time_elapsed()
+    time_to_next_income = math.max(0, time_to_next_income)
+    return time_to_next_income
+end
+
+function income_interval_seconds()
+    if settings.debug then
+        return 5
+    end
+    return settings.income_interval_minutes * 60
+end
+
+function minimum_objects_collected()
+    return size_table(collected_items) >= settings.minimum_objects_for_income
+end
+
+function is_collectable(sec)
+    if collector_ini:line_exist("valid_kind", SYS_GetParam(0, sec, "kind", "na")) then return true end
+    if collector_ini:line_exist("valid_class", SYS_GetParam(0, sec, "class", "na")) then return true end
+    if collector_ini:line_exist("include_section", sec) then return true end
+    if collector_ini:line_exist("exclude_section", sec) then return false end
+    return false
+end
+
+-- Returns number from 0 to 1
+function get_object_quality(id)
+    local quality = 1
+    local obj = level.object_by_id(id)
+    local obj_cond = obj:condition()
+
+    local parts = item_parts.get_parts_con(obj, nil, false)
+    local average_con = 1
+    if parts and not is_empty(parts) then
+        local total_con = 0
+        local part_count = 0
+        for k,v in pairs(parts) do
+            if SYS_GetParam(1, k, "cond_part") then
+                dprint("Part " .. k .. " - Con " .. v)
+                total_con = total_con + math.max(0, v / 99)
+                part_count = part_count + 1
+            end
+        end
+        average_con = total_con / part_count
+        dprint("Total Parts " .. part_count .. " - Avrg con " .. average_con)
+    end
+    quality = (obj_cond + average_con) / 2
+
+    local upgrades_installed = utils_item.get_upgrades_installed(nil, id)
+    quality = quality + (size_table(upgrades_installed) * 0.05)
+
+    dprint("Quality " .. quality)
+    return quality
+end
+
+function get_highest_quality_collected_object(sec)
+    local highest_quality = 0
+    for id, quality in pairs(collected_items[sec]) do
+        if type(quality) == "number" and quality > highest_quality then --Check type cause old indev data
+            highest_quality = quality
+        end
+    end
+    return highest_quality
+end
+
+function show_income_news(income)
+    local header = gc("st_collector_news_header")
+    local msg = parse_keys(gc("st_collector_news_msg"), combine_tables(xml_colors, { ["count"] = size_table(collected_items), ["income"] = income}))
+    xr_sound.set_sound_play(AC_ID, "pda_tips")
+    db.actor:give_game_news(header, msg, "ui_inGame2_PD_Sostoyatelniy_klient", 0, 10000)
+end
+
+function monkey_build_desc_header(obj, sec, str)
+    str = str or gc(ini_sys:r_string_ex(sec,"description"))
+	if not str then return "" end
+    if not obj then return base_build_desc_header(obj, sec, str) end
+
+	if not is_collectable(sec) then return base_build_desc_header(obj, sec, str) end
+
+    local parent_section = SYS_GetParam(0, sec, "parent_section", sec)
+    local collected_str = ""
+
+    -- If stashed collected item
+    if collected_items[parent_section] and collected_items[parent_section][obj:id()] then
+        if settings.enable_stash_tooltip_text then
+            collected_str = gc("st_collector_is_collected")
+            collected_str = collected_str .. "\\n" .. parse_keys(gc("st_collector_current_col"), { ["count"] = size_table(collected_items), ["total"] = size_table(total_collectables)})
+
+            local quality = round(collected_items[parent_section][obj:id()] * 1000) / 10
+            collected_str = collected_str .. "\\n" .. parse_keys(gc("st_collector_tooltip_quality"), { ["quality"] = quality})
+
+            str = collected_str .. "\\n \\n" .. str
+        end
+    -- If non-stashed collectable item
+    elseif settings.enable_inventory_tooltip_text then
+        if collected_items[parent_section] and not collected_items[parent_section][obj:id()] then
+            local highest_quality = round(get_highest_quality_collected_object(parent_section) * 1000) / 10
+            local quality = round(get_object_quality(obj:id()) * 1000) / 10
+            collected_str = gc("st_collector_is_collected") .. "\\n" .. parse_keys(gc("st_collector_highest_quality"), { ["quality"] = quality, ["highest_quality"] = highest_quality})
+        else
+            collected_str = gc("st_collector_not_collected")
+        end
+
+        str = collected_str .. "\\n \\n" .. str
+    end
+
+	return base_build_desc_header(obj, sec, str)
+end
+
+function ActorMenu_on_item_after_move(case, item, mode, bag_from)
+    if not (case and item and mode == "loot") then return end
+    local case_obj = get_object_by_id(case)
+    if case_obj and case_obj:section() and collector_ini:line_exist("valid_stash", case_obj:section()) then
+        local sec = item:section()
+        local sec = SYS_GetParam(0, sec, "parent_section", sec)
+
+        local id = item:id()
+        if valid_actor_bags[bag_from] and is_collectable(sec) then
+            if collected_items[sec] then
+                collected_items[sec][id] = get_object_quality(id)
+                dprint("Added " .. id)
+            else
+                collected_items[sec] = { [id] = get_object_quality(id) }
+                dprint("New sec " .. sec .. " Added " .. id)
+            end
+            if settings.enable_income and minimum_objects_collected() then
+                --Only creates event if there isn't one already running
+                CreateTimeEvent("the_collector", "check_for_income", time_to_next_income(), check_for_income)
+            end
+        else
+            if collected_items[sec] then
+                collected_items[sec][id] = nil
+                dprint("Removed " .. id)
+                if is_empty(collected_items[sec]) then
+                    collected_items[sec] = nil
+                    dprint("Removed " .. sec)
+                end
+            end
+        end
+    end
+end
+
+-- Function for rax_icon_layers
+function icon_collectable(cell, obj, sec)
+    if not sec then return end
+
+	if is_collectable(sec) then
+        local id = cell.ID
+        local sec = SYS_GetParam(0, sec, "parent_section", sec)
+        local axis = utils_xml.get_item_axis(sec)
+        if settings.enable_icon_found and collected_items[sec] and id and collected_items[sec][id] then
+            return {texture = "ui_icon_checkmark", x = (axis.w - 13), y = 1, w = 12, h = 12}
+        elseif settings.enable_icon and not collected_items[sec] and not (cell.container.ID == "actor_equ" or cell.container.ID == "actor_belt") then
+            return {texture = "ui_icon_collector_magnifier2", x = (axis.w - 13), y = 1, w = 12, h = 12}
+        end
+	end
+end
+
+function Monke_Add_Icon(self, sec, w, h)
+    Base_Add_Icon(self, sec, w, h)
+
+    if  self.quality_text then
+        self.quality_text:Show(false)
+    end
+
+    if not settings.enable_quality_text then return end
+
+    local sec = SYS_GetParam(0, sec, "parent_section", sec)
+    local id = self.ID
+    if not (collected_items[sec] and id and collected_items[sec][id]) then return end
+    
+    local obj = level.object_by_id(id)
+    local clsid = obj and obj:clsid()
+	local has_cond = SYS_GetParam(1,sec, "use_condition") or IsWeapon(nil,clsid) or IsOutfit(nil,clsid) or IsHeadgear(nil,clsid) or IsArtefact(nil,clsid)
+	if (not has_cond) then return end
+
+    if not self.quality_text then
+        self.quality_text = XML:InitTextWnd("collector_quality_text", self.ico)
+    end
+
+    self.quality_text:SetWndRect(Frect():set(0, 13, self.ico:GetWidth(), self.ico:GetHeight()))
+    local quality = round(collected_items[sec][id] * 100)
+    self.quality_text:SetText( quality .. "%")
+    self.quality_text:Show(true)
+end
+
+function Monke_Cell_Reset(self)
+    Base_Cell_Reset(self)
+
+    if self.manual then
+		if self.quality_text then 
+            self.quality_text:Show(false)
+        end
+	end
+end
+
+function get_time_elapsed()
+    return (game.get_game_time():diffSec(level.get_start_time()) /level.get_time_factor())
+end
+
+xml_colors = {
+    ["clr_green"] = "%" .. "%c[255,51,255,102]",
+    ["clr_red"] = "%" .. "%c[255,204,0,51]",
+    ["clr_yellow"] = "%" .. "%c[255,250,218,94]",
+    ["clr_gray_1"] = "%" .. "%c[255,170,170,170]",
+    ["clr_gray_2"]   = "%" .. "%c[255,140,140,140]"
+}
+
+function count_collectables()
+    t = {}
+    ini_sys:section_for_each(function(section)
+        if not t[section] then
+            if is_collectable(section) then
+                local sec = section
+                local parent_section = SYS_GetParam(0, sec, "parent_section")
+                if parent_section then
+                    sec = parent_section
+                end
+                t[sec] = true
+            end
+        end
+    end)
+    return t
+end
+
+function combine_tables(t1, t2)
+    z = {}
+    for k,v in pairs(t1) do z[k]=v end
+    for k,v in pairs(t2) do z[k]=v end
+    return z
+end
+
+function save_state(m_data)
+    m_data.collected_items = collected_items
+    m_data.time_last_income = time_last_income
+end
+
+function load_state(m_data)
+    collected_items = m_data.collected_items or {}
+    time_last_income = m_data.time_last_income or 0
+end
+
+-- MCM
+function load_defaults()
+	local t = {}
+	local op = the_collector_mcm.op
+	for i, v in ipairs(op.gr) do
+		if v.def ~= nil then
+			t[v.id] = v.def
+		end
+	end
+	return t
+end
+
+settings = load_defaults()
+
+function load_settings()
+	settings = load_defaults()
+	if ui_mcm then
+		for k, v in pairs(settings) do
+			settings[k] = ui_mcm.get("the_collector/" .. k)
+		end
+	end
+	return settings
+end

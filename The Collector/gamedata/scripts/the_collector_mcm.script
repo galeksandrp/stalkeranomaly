@@ -1,0 +1,23 @@
+
+-- The Collector
+
+op = { id= "the_collector",sh=true ,gr={
+		{ id= "title", type= "slide", link= "ui_options_slider_player", text="ui_mcm_the_collector_title", size= {512,50}, spacing= 20 },
+		{id = "enable_icon", type = "check", val = 1, def=true},
+		{id = "enable_icon_found", type = "check", val = 1, def=true},
+		{id = "enable_quality_text", type = "check", val = 1, def=true},
+		{id = "enable_inventory_tooltip_text", type = "check", val = 1, def=true},
+		{id = "enable_stash_tooltip_text", type = "check", val = 1, def=true},
+		{id = "enable_income", type = "check", val = 1, def=true},
+		{id = "money_per_object", type = "track", val = 2, min=1, max=200, step=1, def = 50},
+		{id = "income_interval_minutes", type = "track", val = 2, min=5, max=240, step=5, def = 30},
+		{id = "scale_by_quality", type = "check", val = 1, def=true},
+		--{id = "scale_by", type= "list", val= 0, def = "scale_parts", content= {{"scale_none","clctr_scale_none"}, {"scale_cond","clctr_scale_cond"},{"scale_parts","clctr_scale_parts"}}},
+		{id = "minimum_objects_for_income", type = "track", val = 2, min=1, max=50, step=1, def = 5},
+		{id = "debug", type = "check", val = 1, def=false},
+	}
+}
+
+function on_mcm_load()
+	return op
+end      

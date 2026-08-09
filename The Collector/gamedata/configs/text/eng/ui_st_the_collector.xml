@@ -1,0 +1,92 @@
+
+<!--
+    The Collector
+    Generated with AnomalyModCreator
+-->
+
+<?xml version="1.0" encoding="windows-1251"?>
+
+
+<string_table>
+	<!-- 
+		Tooltips
+	-->
+
+	<string id="st_collector_is_collected">
+        <text>%c[ui_gray_1]This object is %c[d_green]in your collection</text>
+    </string>
+	<string id="st_collector_highest_quality">
+        <text>%c[ui_gray_2]Object quality: %c[pda_yellow]$quality%%c[ui_gray_2]. Highest quality in collection: %c[pda_yellow]$highest_quality%</text>
+    </string>
+    <string id="st_collector_not_collected">
+        <text>%c[ui_gray_1]This object is %c[d_red]not in your collection</text>
+    </string>
+    <string id="st_collector_current_col">
+        <text>%c[ui_gray_2]You have collected%c[d_green] $count %c[ui_gray_2]objects out of a total possible%c[d_blue] $total</text>
+    </string>
+	<string id="st_collector_tooltip_quality">
+        <text>%c[ui_gray_2]Quality of object: %c[pda_yellow]$quality%c[ui_gray_1]%</text>
+    </string>
+
+    <string id="st_collector_news_header">
+        <text>Collection Income!</text>
+    </string>
+     <string id="st_collector_news_msg">
+        <text>$clr_gray_1You have received $clr_yellow$income $clr_gray_1rubles from your collection of $clr_green$count $clr_gray_1objects!</text>
+    </string>
+
+	<!-- 
+		MCM
+	-->
+
+	<string id="ui_mcm_the_collector_title">
+		<text>The Collector</text>
+	</string>
+	<string id="ui_mcm_menu_the_collector">
+		<text>The Collector</text>
+	</string>
+	<string id="ui_mcm_the_collector_money_per_object">
+		<text>Money Per Collected Object</text>
+	</string>
+	<string id="ui_mcm_the_collector_enable_icon">
+		<text>Enable Collectable Item Icon</text>
+	</string>
+	<string id="ui_mcm_the_collector_enable_icon_found">
+		<text>Enable Collected Item Icon</text>
+	</string>
+	<string id="ui_mcm_the_collector_enable_quality_text">
+		<text>Enable Collected Item Quality Text</text>
+	</string>
+	<string id="ui_mcm_the_collector_enable_inventory_tooltip_text">
+		<text>Enable Player Item Tooltip Text</text>
+	</string>
+	<string id="ui_mcm_the_collector_enable_stash_tooltip_text">
+		<text>Enable Stashed Item Tooltip Text</text>
+	</string>
+	<string id="ui_mcm_the_collector_enable_income">
+		<text>Enable Income</text>
+	</string>
+	<string id="ui_mcm_the_collector_income_interval_minutes">
+		<text>Income Interval (Minutes)</text>
+	</string>
+	<string id="ui_mcm_the_collector_minimum_objects_for_income">
+		<text>Minimum Collected Objects For Income</text>
+	</string>
+	<string id="ui_mcm_the_collector_scale_by_quality">
+		<text>Scale Object Income By Quality</text>
+	</string>
+	<string id="ui_mcm_the_collector_scale_by">
+		<text>Scale Object Income By (Quality)</text>
+	</string>
+	<string id="ui_mcm_lst_clctr_scale_none">
+		<text>No Scaling</text>
+	</string>
+	<string id="ui_mcm_lst_clctr_scale_cond">
+		<text>Base Condition</text>
+	</string>
+	<string id="ui_mcm_lst_clctr_scale_parts">
+		<text>Base and Parts Condition</text>
+	</string>
+
+</string_table>
+                        

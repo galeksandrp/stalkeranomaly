@@ -1,0 +1,8 @@
+<w>
+    <file name = "ui\ui_icon_collector_magnifier2">
+        <texture id = "ui_icon_collector_magnifier2"		x="0"	y="0"	width="64"	height="64" />
+    </file>
+    <file name = "ui\ui_icon_checkmark">
+        <texture id = "ui_icon_checkmark"		x="0"	y="0"	width="64"	height="64" />
+    </file>
+</w>
