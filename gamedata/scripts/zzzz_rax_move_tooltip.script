@@ -27,6 +27,10 @@ function utils_ui.UIInfoItem:Update(obj, sec, flags)
 	
 	curPos = GetCursorPosition()
 	
+	if true then
+		shift_down = (curPos.x < 500)
+	end
+
 	--local cpos = GetCursorPosition()
 	local cpos  = vector2():set(shift_down and alt_x or wind_x,wind_y)
 	local w = element and element:GetWidth() or base:GetWidth()
@@ -35,6 +39,12 @@ function utils_ui.UIInfoItem:Update(obj, sec, flags)
 	-- Default pos at cursor is top/left corner
 	if move_to_bottom and curPos.x <500 and curPos.y<380 then
 		cpos.y = 768 - wind_y 
+	end
+
+	if true then
+		if curPos.y<380 then
+			cpos.y = 768 - wind_y 
+		end
 	end
 	
 	
