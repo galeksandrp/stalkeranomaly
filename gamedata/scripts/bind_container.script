@@ -60,83 +60,6 @@ function can_access_inventory(obj)
 end 
 
 -- called from item section in items.ltx
-
--- BB84's FDDA support -- Start --
--- BB84 edit Start --
-local ini_eff = {}
-local fov_prev,active_slot,item_after_backpack,backpack_open_flag,crouch_value,crouching,ea_force_inventory_close
-local crouch_toggle = true
-local bool_to_int = {
-	[true] = 1,
-	[false] = 0,
-}
-ini_eff = ini_file("items\\items\\ea_addon_backpack.ltx")
-
-function EA_anim_stop(used_item)
-	if used_item:sub(1,13) == "backpack_open" then
-		fov_prev = axr_main.config:r_value("temp", "fov_value", 2)
-		fov_anim_manager.change_fov(0.45)
-		backpack_faction = character_community(db.actor):sub(7)
-		idle = "item_ea_backpack_open_" .. backpack_faction  .. "_" .. "hud"
-		game.play_hud_motion(2, idle, "anm_ea_idle", false, 1)
-		RemoveTimeEvent("ea_slot_returner", "call_my_slot_back")
-		CreateTimeEvent(my_id,"container",0,use_container,my_se_box.id,my_id)
-		game.only_allow_movekeys(false)
-	end
-end
-
-function backpack_close()
-    if not my_id then return end
-    my_id = nil
-    my_se_box = nil
-    if fov_prev then
-        exec_console_cmd("hud_fov " .. fov_prev)
-        fov_prev = nil
-    end
-    enhanced_animations.used_item = "backpack_close" .. "_" .. backpack_faction
-    enhanced_animations.anim_section = ini_eff:r_string_ex(enhanced_animations.used_item, "anm")
-    enhanced_animations.anim_prepare()
-end
-
-function a_crouch()
-	printf("YES???")
-	if crouch_toggle then
-		level.press_action(bind_to_dik(key_bindings.kCROUCH))
-		level.release_action(bind_to_dik(key_bindings.kCROUCH))
-		printf("crouched222")
-	end
-	return true
-end
-
-function backpack_open()
-	if IsMoveState("mcClimb") then
-		actor_menu.set_msg(1, game.translate_string("st_EA_ladder_item_not_allowed"),3)
-		backpack_open_flag = nil
-		return
-	end
-	crouch_value = get_console_cmd(1, "g_crouch_toggle")
-	get_console():execute("g_crouch_toggle 1")
-	crouching = IsMoveState('mcCrouch')
-	printf("crouching = "..bool_to_int[crouching])
-	if (crouch_value and not crouching) or not crouch_value  then
-		-- a_crouch()
-		CreateTimeEvent("bruh", "bruh crouch", 0.1, a_crouch)
-		printf("crouched")
-	end
-	-- level.disable_input()
-	--recalc_actor_campos()
-	backpack_faction = character_community(db.actor):sub(7)
-	enhanced_animations.used_item = "backpack_open" .. "_" .. backpack_faction
-	enhanced_animations.anim_section = ini_eff:r_string_ex(enhanced_animations.used_item, "anm")
-	enhanced_animations.anim_prepare()
-end
-
-function on_game_start()
-	ea_callbacks.EA_RegisterScriptCallback("ea_on_item_anim_stop",EA_anim_stop)
-	RegisterScriptCallback("GUI_on_hide",backpack_close)
-end
---BB84 edit End--
-
 function access_inventory(obj)
 	local id = obj:id()
 	local se_inv_box = containers[id] and containers[id].id and alife_object(containers[id].id)
@@ -148,7 +71,6 @@ function access_inventory(obj)
 		-- create inventory_box_s
 		se_inv_box = alife_create("hidden_box",pos,level.vertex_id(pos),db.actor:game_vertex_id())
 	end
-	
 	if (se_inv_box) then
 		-- shouldn't be possible but very safe incase some sort of save corruption
 		if not (IsInvbox(nil,se_inv_box:clsid())) then
@@ -163,20 +85,9 @@ function access_inventory(obj)
 		containers[id].id = se_inv_box.id
 		
 		-- Object will come online next update so wait
-
-		--BB84 edit Start--
-		ui_inventory.hide_hud_inventory()
-		backpack_open()
-		my_se_box = se_inv_box
-		my_id=id
-		-- CreateTimeEvent(id,"container",0,use_container,se_inv_box.id,id)
-		--BB84 edit End--
-
+		CreateTimeEvent(id,"container",0,use_container,se_inv_box.id,id)
 	end
 end
-
--- BB84's FDDA support -- End --
-
 --------------------------------------------------------------------------------
 -- Class "container_binder"
 --------------------------------------------------------------------------------
