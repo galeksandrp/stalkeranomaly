@@ -14,6 +14,21 @@ This script does not make an MCM menu. It leerages MCM to load early enough to m
 --]]
 
 
+local globalSYS_GetParam = SYS_GetParam
+function exportSYS_GetParam(typ, sec, param, def)
+	if param == "inv_grid_scale" then
+		if globalSYS_GetParam(2, sec, "inv_grid_width") > 1 or globalSYS_GetParam(2, sec, "inv_grid_height") > 1 then
+			return 2;
+		end
+	end
+
+	return globalSYS_GetParam(typ, sec, param, def)
+end
+local function SYS_GetParam(typ, sec, param, def)
+	return exportSYS_GetParam(typ, sec, param, def)
+end
+
+
 local ratio = utils_xml.screen_ratio()
 icon_override = ini_file_ex("icon_override\\icon_override.ltx")
 

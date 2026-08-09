@@ -35,6 +35,11 @@ TODO:
 --]]
 
 
+local function SYS_GetParam(typ, sec, param, def)
+	return aaa_rax_icon_override_mcm.exportSYS_GetParam(typ, sec, param, def)
+end
+
+
 local ratio = utils_xml.screen_ratio()
 
 local XMLP = CScriptXmlInit()

@@ -5,6 +5,11 @@ This work is licensed under a Creative Commons Attribution-NonCommercial-ShareAl
 Author: RavenAscendant
 --]]
 
+local function SYS_GetParam(typ, sec, param, def)
+	return aaa_rax_icon_override_mcm.exportSYS_GetParam(typ, sec, param, def)
+end
+
+
 function pr(txt, ...)
     --  printf("RAXPH: "..txt, ...)
 end
