@@ -107,6 +107,10 @@ function minimum_objects_collected()
 end
 
 function is_collectable(sec)
+	if true then
+		return true
+	end
+
     if collector_ini:line_exist("valid_kind", SYS_GetParam(0, sec, "kind", "na")) then return true end
     if collector_ini:line_exist("valid_class", SYS_GetParam(0, sec, "class", "na")) then return true end
     if collector_ini:line_exist("include_section", sec) then return true end
