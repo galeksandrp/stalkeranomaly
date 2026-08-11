@@ -1,0 +1,21 @@
+__index = utils_xml
+
+-- demonized: HD Inventory Icons Framework
+local icon_override = aaa_rax_icon_override_mcm and aaa_rax_icon_override_mcm.icon_override
+
+function get_item_axis(sec)
+	local axis = utils_xml.get_item_axis(sec)
+
+	-- demonized: HD Inventory Icons Framework
+	local scale = icon_override and icon_override:section_exist(sec) and (icon_override:r_float_ex(sec, "inv_grid_scale") or 1) or aaa_rax_icon_override_mcm.exportSYS_GetParam(2, sec, "inv_grid_scale", 1)
+	axis.w = math.ceil(axis.w / scale)
+	axis.h = math.ceil(axis.h / scale)
+
+	return axis
+end
+
+zzz_rax_sortingplus_mcm.SYS_GetParam = aaa_rax_icon_override_mcm.exportSYS_GetParam
+dynamic_eq_icon.SYS_GetParam = aaa_rax_icon_override_mcm.exportSYS_GetParam
+icon_overlayer_mcm.SYS_GetParam = aaa_rax_icon_override_mcm.exportSYS_GetParam
+
+the_collector.utils_xml = zzzz_custom
